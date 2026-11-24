@@ -75,7 +75,7 @@ function err(pos, message) { return { pos, message }; }
 function validateCIN(input) {
   const s = clean(input);
   const errors = [];
-  const parts = { raw: s };
+  const parts = { raw: s, normalised: s };
   if (s.length !== 21) {
     errors.push(err('Length', `Must be exactly 21 characters — this has ${s.length}.`));
   }

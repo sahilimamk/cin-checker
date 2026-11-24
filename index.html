@@ -158,7 +158,7 @@
     const p = r.parts;
     const seg = (label, val) => `<span class="seg"><b>${esc(val)}</b><span>${esc(label)}</span></span>`;
     return `<details class="detail"><summary>See the breakdown</summary><div class="segments">`
-      + seg(p.listing, p.normalised[0]) + seg('Industry code', p.industryCode)
+      + seg(p.listing, r.normalised[0]) + seg('Industry code', p.industryCode)
       + seg(p.state, p.stateCode) + seg('Incorporated', String(p.year))
       + seg(p.type, p.typeCode) + seg('Reg. no.', p.regNo)
       + `</div><p class="note">${esc(p.typeNote || '')} ${p.industry ? 'Industry: ' + esc(p.industry) + '.' : 'Industry code ' + esc(p.industryCode) + ' — activity not labelled here; check NIC 2008.'} ${p.age != null ? 'About ' + p.age + ' years old.' : ''}</p></details>`;
@@ -212,7 +212,11 @@
       }
       return true;
     });
-    body.innerHTML = rows.length ? rows.map(rowHTML).join('')
+    // Render row by row: one bad row must never blank the whole table again.
+    body.innerHTML = rows.length ? rows.map(r => {
+      try { return rowHTML(r); }
+      catch (e) { return `<tr class="invalid-row"><td data-label="Number"><span class="mono">${esc(r.input)}</span></td><td data-label="Status"><span class="pill invalid">✕ Invalid</span></td><td data-label="What it is">—</td><td data-label="State · Year">—</td><td data-label="Details"><ul class="errlist"><li><b>Display:</b> this row could not be shown (${esc(e.message)}). The number itself was checked — try the CSV download for the raw result.</li></ul></td></tr>`; }
+    }).join('')
       : `<tr><td colspan="5"><div class="empty-state"><h3>No results match that filter</h3><p>Try “All”, or clear the search box.</p></div></td></tr>`;
     body.querySelectorAll('[data-fix]').forEach(btn => btn.addEventListener('click', () => {
       const lines = input.value.split(/\r?\n/);
@@ -241,7 +245,7 @@
     timingEl.textContent = `Checked ${s.total} number${s.total===1?'':'s'} in ${last.ms} ms${last.blank ? ` · ${last.blank} blank line${last.blank===1?'':'s'} ignored` : ''} · all in your browser`;
     area.hidden = false; emptyState.hidden = true;
     render();
-    area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (typeof area.scrollIntoView === 'function') area.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   function download(name, text, type){
     const a = document.createElement('a');
