@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CIN &amp; LLPIN Checker — FileSure</title>
+<meta name="description" content="Paste CINs and LLPINs, one per line. See in plain English whether each one is valid, what kind of company it is, where it is registered and when it was incorporated. Free, no sign-up, nothing is uploaded.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand"><span class="mark">F</span><span>FileSure<small>CIN &amp; LLPIN CHECKER</small></span></div>
+    <nav><a href="#checker">Checker</a><a href="#how">How to read a CIN</a><a href="#reference">Reference</a><a href="#faq">FAQ</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <p class="eyebrow">Free tool · No sign-up · Runs in your browser</p>
+    <h1>Is that CIN <em>actually valid?</em></h1>
+    <p class="lede">Paste a list of CINs and LLPINs, one per line. For each one you get a plain-English answer: valid or not — and if not, exactly what is wrong — plus the company type, listing status, state and year of incorporation.</p>
+    <ul class="trust">
+      <li><b>Nothing is uploaded</b> — checking happens on your device</li>
+      <li><b>Built for CAs, lawyers &amp; business owners</b></li>
+      <li><b>500 lines?</b> No problem — it checks them in milliseconds</li>
+    </ul>
+  </section>
+
+  <section class="card checker" id="checker" aria-label="CIN and LLPIN checker">
+    <label for="input">Paste CINs and LLPINs — one per line</label>
+    <p class="hint">Example: <code>L17110MH1973PLC019786</code> &nbsp;·&nbsp; <code>AAB-1234</code>. Spaces and lowercase are fine. Blank lines are ignored.</p>
+    <textarea id="input" rows="9" spellcheck="false" placeholder="L17110MH1973PLC019786&#10;L85110KA1981PLC013115&#10;U65929KA2018PLC116815&#10;AAB-1234&#10;U72900MH2015PTC123456"></textarea>
+    <div class="inline-error" id="emptyError" role="alert">Nothing to check yet. Paste at least one CIN or LLPIN above — or try the sample list.</div>
+    <div class="actions">
+      <button class="btn-primary" id="checkBtn" type="button">Check numbers</button>
+      <button class="btn-ghost" id="sampleBtn" type="button">Try a sample list</button>
+      <button class="btn-ghost" id="bulkBtn" type="button">Test with 500 lines</button>
+      <button class="btn-quiet" id="clearBtn" type="button">Clear</button>
+    </div>
+    <div class="meta-row">
+      <span class="count" id="lineCount">0 lines · 0 numbers</span>
+      <span>Your list never leaves this page. <a href="https://www.mca.gov.in" target="_blank" rel="noopener">Verify the live record on MCA →</a></span>
+    </div>
+  </section>
+
+  <div id="resultsArea" hidden>
+    <div class="stats" id="stats" aria-live="polite"></div>
+    <div class="filters" role="group" aria-label="Filter results">
+      <button type="button" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" data-filter="valid" aria-pressed="false">Valid only</button>
+      <button type="button" data-filter="invalid" aria-pressed="false">Problems only</button>
+      <button type="button" data-filter="company" aria-pressed="false">Companies</button>
+      <button type="button" data-filter="llp" aria-pressed="false">LLPs</button>
+      <span class="search"><input id="search" type="search" placeholder="Filter by state, type or number…" aria-label="Filter results"></span>
+    </div>
+    <div class="results-head">
+      <h2>Results</h2>
+      <p id="timing"></p>
+    </div>
+    <div class="table-scroll">
+      <table id="resultsTable">
+        <thead><tr><th>Number</th><th>Status</th><th>What it is</th><th>State · Year</th><th>Details / what is wrong</th></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+    <div class="actions" style="margin-top:14px">
+      <button class="btn-ghost" id="csvBtn" type="button">Download results (.csv)</button>
+      <button class="btn-ghost" id="copyBtn" type="button">Copy summary</button>
+    </div>
+    <div class="callout">
+      <h3>A valid format is not proof the company exists</h3>
+      <p>This checker catches typos and impossible codes. It cannot tell you whether a company is active, struck off, or behind on filings. For that, look the number up on MCA master data — each valid row below has a link. If the MCA record does not match the letterhead, ask questions before you sign or pay.</p>
+    </div>
+  </div>
+
+  <div id="emptyState" class="card empty-state">
+    <h3>Nothing checked yet</h3>
+    <p>Paste your list above and press <b>Check numbers</b>. Or press <b>Try a sample list</b> to see what a clean result — and a messy one — looks like.</p>
+    <button class="btn-ghost" id="sampleBtn2" type="button">Try a sample list</button>
+  </div>
+
+  <section class="block" id="how">
+    <h2>How to read a CIN, in 30 seconds</h2>
+    <p>A CIN is 21 characters, in six parts. Read it left to right and it tells you whether the company is listed, what it does, where it is registered, when it started, what kind of company it is, and its registration number.</p>
+    <div class="anatomy" aria-label="CIN anatomy for L17110MH1973PLC019786">
+      <div><span class="pos">Char 1</span><span class="code">L</span><p>Listed or unlisted. L = listed, U = unlisted.</p></div>
+      <div><span class="pos">Chars 2–6</span><span class="code">17110</span><p>Industry code — the NIC code for its main activity.</p></div>
+      <div><span class="pos">Chars 7–8</span><span class="code">MH</span><p>State of the registered office — MH is Maharashtra.</p></div>
+      <div><span class="pos">Chars 9–12</span><span class="code">1973</span><p>Year of incorporation.</p></div>
+      <div><span class="pos">Chars 13–15</span><span class="code">PLC</span><p>Company type — PLC is a public limited company.</p></div>
+      <div><span class="pos">Chars 16–21</span><span class="code">019786</span><p>Registration number given by the Registrar of Companies.</p></div>
+    </div>
+    <p style="margin-top:14px">So <code>L17110MH1973PLC019786</code> reads: a <b>listed public limited company</b>, registered in <b>Maharashtra</b> in <b>1973</b>. An LLPIN is different and much shorter — <code>AAB-1234</code> is 3 letters, a hyphen and 4 digits — and it encodes no state, year or activity at all.</p>
+    <p>Two traps this checker is built to catch: <b>PLC does not mean listed</b> — a public company can be unlisted (its CIN starts with U), and <b>O is not 0</b> — a scanned letterhead often turns a zero into the letter O. Where a single O-to-0 fix makes a number valid, the result says so.</p>
+  </section>
+
+  <section class="block" id="reference">
+    <h2>Reference</h2>
+    <p>Every code this checker recognises, so you can see exactly what it is judging against. MCA has never published a formal CIN specification — these are the codes as they appear on CINs MCA has issued.</p>
+    <div class="two-col">
+      <div class="card ref">
+        <h3>Company-type codes (chars 13–15)</h3>
+        <div class="table-scroll"><table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody id="typeRef"></tbody></table></div>
+      </div>
+      <div class="card ref">
+        <h3>State codes (chars 7–8)</h3>
+        <div class="table-scroll"><table><thead><tr><th>Code</th><th>State / UT</th></tr></thead><tbody id="stateRef"></tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block faq" id="faq">
+    <h2>Questions, answered plainly</h2>
+    <details><summary>Does a “Valid” result mean the company is real and active?</summary><p>No. It means the number is well formed — the right length, a real state code, a real company-type code, a plausible year. A made-up number can pass a format check. Only the MCA master-data record shows whether the company exists, its status and its filings.</p></details>
+    <details><summary>What does the industry code mean?</summary><p>It is a 5-digit NIC (National Industrial Classification) code for the company’s main activity when it was registered. For older companies it may not describe what the business does today. This page labels only code 72900, which sources agree on; for other codes it shows the number and does not guess the activity.</p></details>
+    <details><summary>Why does an LLPIN tell me so little?</summary><p>Because that is all it contains: a 3-letter registry series and a 4-digit serial. State, year and activity are not encoded in it. You need the LLP’s MCA master-data record for those.</p></details>
+    <details><summary>Is my list sent anywhere?</summary><p>No. All checking runs in JavaScript in your browser. There is no account, no upload and no log of what you paste.</p></details>
+    <details><summary>What if a number changed — for example, the company listed?</summary><p>The CIN changes when listing status, state or company type changes, so an old document can carry an old CIN. If a number fails here but looks right on an old letterhead, check the current CIN on MCA.</p></details>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><b>FileSure — CIN &amp; LLPIN Checker.</b> A format checker, not legal advice and not a substitute for the MCA master-data record. Sources: Companies Act, 2013 (s. 7(3), s. 12(3)); LLP Act, 2008; MCA master data (mca.gov.in). Format rules checked 24 November 2026. <a href="https://github.com/sahilimamk/cin-checker">Code on GitHub</a>.</p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const input = $('input'), body = $('resultsBody'), area = $('resultsArea'),
+        emptyState = $('emptyState'), emptyError = $('emptyError'),
+        statsEl = $('stats'), timingEl = $('timing'), lineCount = $('lineCount');
+  let last = { results: [], summary: null, ms: 0, blank: 0 };
+  let filter = 'all', query = '';
+
+  const SAMPLE = [
+    'L17110MH1973PLC019786','L85110KA1981PLC013115','U65929KA2018PLC116815',
+    'U72900DL2016PTC123456','U62099MH2025OPC401122','AAB-1234','AAA-1234',
+    'L17110MH1973PLC01978','X17110MH1973PLC019786','L1711OMH1973PLC019786',
+    'U72900XX2015PTC123456','U72900MH2099PTC123456','U72900MH2015XXX123456',
+    'AAB-123','AB-1234','aab-1234','AAA-1234/LLP',''
+  ].join('\n');
+
+  function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function updateCount(){
+    const lines = input.value.split(/\r?\n/);
+    const n = lines.filter(l => l.trim()).length;
+    lineCount.innerHTML = `<b>${lines.length}</b> line${lines.length===1?'':'s'} · <b>${n}</b> number${n===1?'':'s'} pasted`;
+  }
+  function segments(r){
+    if (r.kind !== 'company' || !r.valid) return '';
+    const p = r.parts;
+    const seg = (label, val) => `<span class="seg"><b>${esc(val)}</b><span>${esc(label)}</span></span>`;
+    return `<details class="detail"><summary>See the breakdown</summary><div class="segments">`
+      + seg(p.listing, p.normalised[0]) + seg('Industry code', p.industryCode)
+      + seg(p.state, p.stateCode) + seg('Incorporated', String(p.year))
+      + seg(p.type, p.typeCode) + seg('Reg. no.', p.regNo)
+      + `</div><p class="note">${esc(p.typeNote || '')} ${p.industry ? 'Industry: ' + esc(p.industry) + '.' : 'Industry code ' + esc(p.industryCode) + ' — activity not labelled here; check NIC 2008.'} ${p.age != null ? 'About ' + p.age + ' years old.' : ''}</p></details>`;
+  }
+  function rowHTML(r){
+    const status = r.valid
+      ? `<span class="pill valid">✓ Valid</span>`
+      : `<span class="pill invalid">✕ Invalid</span>`;
+    const kind = r.kind === 'llp'
+      ? `<span class="pill llp">LLP · LLPIN</span>`
+      : `<span class="pill co">Company · CIN</span>`;
+    let what = '—';
+    if (r.kind === 'company' && r.valid) {
+      what = `${esc(r.parts.type)}<br><span class="pill ${r.parts.listing === 'Listed' ? 'listed' : 'unlisted'}" style="margin-top:5px">${esc(r.parts.listing)}</span>`;
+      if (r.parts.listing === 'Listed') what += `<div class="note">Listed on a stock exchange.</div>`;
+      else if (r.parts.typeCode === 'PLC') what += `<div class="note">Public company, but unlisted — PLC ≠ listed.</div>`;
+    } else if (r.kind === 'llp' && r.valid) {
+      what = `Limited Liability Partnership<br><span class="note">LLPIN encodes no state or year.</span>`;
+    } else if (r.kind === 'llp') {
+      what = `LLP (LLPIN)`;
+    }
+    const where = r.kind === 'company' && r.valid
+      ? `${esc(r.parts.state)}<br><span class="note">${esc(String(r.parts.year))} · reg. ${esc(r.parts.regNo)}</span>`
+      : (r.kind === 'llp' && r.valid ? `—<br><span class="note">Not encoded in an LLPIN</span>` : '—');
+    let detail = '';
+    if (r.valid) {
+      detail = segments(r);
+      if (r.notes && r.notes.length) detail += `<p class="note">${r.notes.map(esc).join(' ')}</p>`;
+      detail += `<p class="mca"><a href="https://www.mca.gov.in/content/mca/global/en/mca/master-data.html" target="_blank" rel="noopener">Check the live MCA record →</a></p>`;
+    } else {
+      detail = `<ul class="errlist">${r.errors.map(e => `<li><b>${esc(e.pos)}:</b> ${esc(e.message)}</li>`).join('')}</ul>`;
+      if (r.suggestion) detail += `<div class="fix">Did you mean <b class="mono">${esc(r.suggestion)}</b>?${r.kind === 'company' ? ' That fixes it — the letter O was probably a zero.' : ''}<button type="button" data-fix="${esc(r.suggestion)}">Use this</button></div>`;
+    }
+    return `<tr class="${r.valid ? '' : 'invalid-row'}">
+      <td data-label="Number"><span class="mono">${esc(r.input)}</span>${r.normalised && r.normalised !== r.input ? `<div class="note">→ <span class="mono">${esc(r.normalised)}</span></div>` : ''}<div class="note">Line ${r.line}</div></td>
+      <td data-label="Status">${status}</td>
+      <td data-label="What it is">${kind}<div style="margin-top:6px">${what}</div></td>
+      <td data-label="State · Year">${where}</td>
+      <td data-label="Details">${detail}</td></tr>`;
+  }
+  function render(){
+    const q = query.trim().toLowerCase();
+    const rows = last.results.filter(r => {
+      if (filter === 'valid' && !r.valid) return false;
+      if (filter === 'invalid' && r.valid) return false;
+      if (filter === 'company' && r.kind !== 'company') return false;
+      if (filter === 'llp' && r.kind !== 'llp') return false;
+      if (q) {
+        const hay = [r.input, r.normalised, r.parts.state, r.parts.type, r.parts.listing, r.parts.year, r.parts.stateCode, r.parts.typeCode].join(' ').toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    body.innerHTML = rows.length ? rows.map(rowHTML).join('')
+      : `<tr><td colspan="5"><div class="empty-state"><h3>No results match that filter</h3><p>Try “All”, or clear the search box.</p></div></td></tr>`;
+    body.querySelectorAll('[data-fix]').forEach(btn => btn.addEventListener('click', () => {
+      const lines = input.value.split(/\r?\n/);
+      // Replace the first line that produced this suggestion.
+      const idx = last.results.findIndex(r => r.suggestion === btn.dataset.fix);
+      if (idx >= 0) { lines[last.results[idx].line - 1] = btn.dataset.fix; input.value = lines.join('\n'); check(); }
+    }));
+  }
+  function check(){
+    const text = input.value;
+    const t0 = performance.now();
+    const parsed = parseList(text);
+    const ms = Math.max(1, Math.round(performance.now() - t0));
+    if (!parsed.results.length) {
+      emptyError.classList.add('show');
+      area.hidden = true; emptyState.hidden = false;
+      input.focus(); return;
+    }
+    emptyError.classList.remove('show');
+    last = { results: parsed.results, summary: summarise(parsed.results), ms, blank: parsed.blank };
+    const s = last.summary;
+    statsEl.innerHTML = [
+      [s.total, 'Numbers checked'], [s.valid, 'Valid', 'good'], [s.invalid, 'With problems', 'bad'],
+      [s.companies, 'Companies'], [s.llps, 'LLPs'], [s.listed, 'Listed']
+    ].map(([n, t, cls]) => `<div class="stat ${cls || ''}"><div class="n">${n}</div><div class="t">${t}</div></div>`).join('');
+    timingEl.textContent = `Checked ${s.total} number${s.total===1?'':'s'} in ${last.ms} ms${last.blank ? ` · ${last.blank} blank line${last.blank===1?'':'s'} ignored` : ''} · all in your browser`;
+    area.hidden = false; emptyState.hidden = true;
+    render();
+    area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function download(name, text, type){
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  $('checkBtn').addEventListener('click', check);
+  $('sampleBtn').addEventListener('click', () => { input.value = SAMPLE; updateCount(); check(); });
+  $('sampleBtn2').addEventListener('click', () => { input.value = SAMPLE; updateCount(); check(); });
+  $('clearBtn').addEventListener('click', () => { input.value = ''; updateCount(); area.hidden = true; emptyState.hidden = false; emptyError.classList.remove('show'); input.focus(); });
+  $('bulkBtn').addEventListener('click', () => {
+    const good = ['L17110MH1973PLC019786','L85110KA1981PLC013115','U72900DL2016PTC123456','AAB-1234','U62099MH2025OPC401122'];
+    const bad = ['L17110MH1973PLC01978','U72900XX2015PTC123456','AAB-123','U72900MH2099PTC123456'];
+    const lines = [];
+    for (let i = 0; i < 500; i++) lines.push(i % 7 === 6 ? bad[i % bad.length] : good[i % good.length]);
+    input.value = lines.join('\n'); updateCount(); check();
+  });
+  input.addEventListener('input', updateCount);
+  input.addEventListener('keydown', e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') check(); });
+  document.querySelectorAll('.filters button').forEach(b => b.addEventListener('click', () => {
+    filter = b.dataset.filter;
+    document.querySelectorAll('.filters button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    render();
+  }));
+  $('search').addEventListener('input', e => { query = e.target.value; render(); });
+  $('csvBtn').addEventListener('click', () => download('cin-checker-results.csv', toCSV(last.results), 'text/csv'));
+  $('copyBtn').addEventListener('click', async () => {
+    const s = last.summary;
+    const text = `CIN / LLPIN check — ${s.total} numbers: ${s.valid} valid, ${s.invalid} with problems (${s.companies} companies, ${s.llps} LLPs, ${s.listed} listed). Checked in the browser at filesure.in — format only, verify live status on MCA.`;
+    try { await navigator.clipboard.writeText(text); $('copyBtn').textContent = 'Copied ✓'; setTimeout(() => $('copyBtn').textContent = 'Copy summary', 1800); }
+    catch { download('cin-checker-summary.txt', text, 'text/plain'); }
+  });
+
+  // Reference tables, built from the same data as the checker — no drift.
+  $('typeRef').innerHTML = Object.entries(TYPE_CODES).map(([c, v]) => `<tr><td><b class="mono">${c}</b></td><td>${esc(v.name)}</td></tr>`).join('');
+  $('stateRef').innerHTML = Object.entries(STATE_CODES).map(([c, v]) => `<tr><td><b class="mono">${c}</b></td><td>${esc(v)}</td></tr>`).join('');
+  updateCount();
+})();
+</script>
+</body>
+</html>
